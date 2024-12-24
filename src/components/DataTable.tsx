@@ -79,7 +79,7 @@ export function DataTable({ posts }: DataTableProps) {
             <TableRow>
               <TableHead className="text-white cursor-pointer w-20 text-xs font-medium">
                 <div className="flex items-center gap-1" onClick={() => handleSort('post_thumbnail')}>
-                  <span className="whitespace-nowrap">Thumbs</span>
+                  <span className="whitespace-nowrap">Thumb</span>
                   <ArrowUpDown className="h-3 w-3" />
                 </div>
               </TableHead>
