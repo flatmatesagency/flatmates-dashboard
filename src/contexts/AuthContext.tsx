@@ -1,10 +1,15 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
+import supabase from '../lib/supabase';
+
+interface User {
+  email: string;
+  // altri campi dell'utente se necessari
+}
 
 interface AuthContextType {
+  user: User | null;
   login: (email: string, password: string) => Promise<any>;
   logout: () => Promise<void>;
-  user: any;
   isAuthenticated: boolean;
   isLoading: boolean;
   initializeUserData: () => Promise<void>;

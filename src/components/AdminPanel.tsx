@@ -26,6 +26,8 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { ArrowUpDown, Search } from "lucide-react"
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 interface InputData {
   "Id": string;
@@ -38,8 +40,11 @@ interface InputData {
 }
 
 const AdminPanel: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [inputData, setInputData] = useState<InputData[]>([]);
   const [newVideo, setNewVideo] = useState({ 
+    "Id": '',
     "Link contenuto": '', 
     "Titolo breve": '', 
     "Cliente": '', 
@@ -49,7 +54,7 @@ const AdminPanel: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingData, setEditingData] = useState<InputData | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [sortConfig, setSortConfig] = useState<{
@@ -59,22 +64,35 @@ const AdminPanel: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
+    // Lista degli utenti autorizzati (email)
+    const authorizedUsers = [
+      'pietro.boschini97@gmail.com',
+      'alessandro@flatmatesagency.com'
+      // Aggiungi altre email autorizzate qui
+    ];
+
+    if (!user || !authorizedUsers.includes(user.email)) {
+      navigate('/'); // Reindirizza alla home se non autorizzato
+      return;
+    }
+
     fetchInputData();
-  }, []);
+  }, [user, navigate]);
 
   const fetchInputData = async () => {
     setIsLoading(true);
     try {
+      console.log('Inizio recupero dati...');
       const { data, error } = await supabase
         .from('Input Tablev2')
         .select(`
-          "Id",
-          "created_at",
+          Id,
           "Link contenuto",
           "Titolo breve",
           "Cliente",
           "Numero offerta",
-          "Costo"
+          "Costo",
+          created_at
         `)
         .order('created_at', { ascending: false });
       
@@ -89,7 +107,8 @@ const AdminPanel: React.FC = () => {
         return;
       }
 
-      console.log('Dati recuperati:', data);
+      console.log('Dati recuperati dal server:', data);
+      
       setInputData(data);
     } catch (error) {
       console.error('Errore durante il fetch:', error);
@@ -99,45 +118,107 @@ const AdminPanel: React.FC = () => {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewVideo({ ...newVideo, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setNewVideo(prev => ({ ...prev, [name]: value }));
+
+    // Se il campo modificato è "Link contenuto", estrai l'ID
+    if (name === "Link contenuto") {
+      let videoId = null;
+      if (value) {
+        const patterns = [
+          /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i,
+          /(?:vimeo\.com\/(?:video\/)?)([\d]+)/i
+        ];
+
+        for (const pattern of patterns) {
+          const match = value.match(pattern);
+          if (match && match[1]) {
+            videoId = match[1];
+            break;
+          }
+        }
+      }
+      setNewVideo(prev => ({ ...prev, "Id": videoId || '' }));
+    }
   };
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (editingData) {
-      setEditingData({ ...editingData, [e.target.name]: e.target.value });
+      const newEditingData = { 
+        ...editingData, 
+        [e.target.name]: e.target.value 
+      };
+      console.log('Aggiornamento dati in modifica:', {
+        campo: e.target.name,
+        nuovoValore: e.target.value,
+        nuoviDati: newEditingData
+      });
+      setEditingData(newEditingData);
     }
   };
   const handleEdit = (item: InputData) => {
+    console.log('Avvio modifica per item:', item);
     if (item.Id) {
       setEditingId(item.Id);
       setEditingData(item);
+      console.log('Stato di modifica impostato:', {
+        editingId: item.Id,
+        editingData: item
+      });
     }
   };
 
   const handleUpdate = async () => {
-    if (!editingData) return;
+    if (!editingData || !editingData.Id) return;
 
-    const { error } = await supabase
-      .from('Input Tablev2')
-      .update({
-        "Link contenuto": editingData["Link contenuto"],
-        "Titolo breve": editingData["Titolo breve"],
-        "Cliente": editingData["Cliente"],
-        "Numero offerta": editingData["Numero offerta"],
-        "Costo": editingData["Costo"],
-      })
-      .eq('Id', editingData["Id"]);
+    console.log('Tentativo di aggiornamento con i dati:', editingData);
+    
+    try {
+      // Creiamo un oggetto con solo i campi che vogliamo aggiornare
+      const updateData = {
+        "Link contenuto": editingData["Link contenuto"] || null,
+        "Titolo breve": editingData["Titolo breve"] || null,
+        "Cliente": editingData["Cliente"] || null,
+        "Numero offerta": editingData["Numero offerta"] || null,
+        "Costo": editingData["Costo"] || null
+      };
 
-    if (error) {
-      console.error('Errore nell\'aggiornamento:', error);
-    } else {
+      console.log('Dati da aggiornare:', updateData);
+
+      // Eseguiamo l'aggiornamento
+      const { error } = await supabase
+        .from('Input Tablev2')
+        .update(updateData)
+        .eq('Id', editingData.Id);
+
+      if (error) {
+        console.error('Errore nell\'aggiornamento:', error);
+        return;
+      }
+
+      console.log('Aggiornamento completato con successo');
+
+      // Aggiorniamo lo stato locale
+      setInputData(prevData => 
+        prevData.map(item => 
+          item.Id === editingData.Id ? { ...item, ...updateData } : item
+        )
+      );
+
       setEditingId(null);
       setEditingData(null);
-      fetchInputData();
+
+      // Ricarica i dati dal server
+      await fetchInputData();
+
+    } catch (error) {
+      console.error('Errore durante l\'operazione di aggiornamento:', error);
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
+    console.log('Tentativo di eliminazione del record con ID:', id);
+    
     const { error } = await supabase
       .from('Input Tablev2')
       .delete()
@@ -145,8 +226,19 @@ const AdminPanel: React.FC = () => {
 
     if (error) {
       console.error('Errore nella cancellazione:', error);
+      console.error('Dettagli errore:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      });
     } else {
-      fetchInputData();
+      // Aggiorniamo localmente i dati
+      setInputData(prevData => 
+        prevData.filter(item => item.Id !== id)
+      );
+      console.log('Eliminazione completata con successo');
+      // Ricarica i dati dal server per sicurezza
+      await fetchInputData();
     }
   };
 
@@ -156,6 +248,7 @@ const AdminPanel: React.FC = () => {
       const { data, error } = await supabase
         .from('Input Tablev2')
         .insert([{
+          "Id": newVideo["Id"] || null,
           "Link contenuto": newVideo["Link contenuto"] || null,
           "Titolo breve": newVideo["Titolo breve"] || null,
           "Cliente": newVideo["Cliente"] || null,
@@ -171,6 +264,7 @@ const AdminPanel: React.FC = () => {
 
       console.log('Record inserito:', data);
       setNewVideo({ 
+        "Id": '',
         "Link contenuto": '', 
         "Titolo breve": '', 
         "Cliente": '', 
@@ -261,6 +355,13 @@ const AdminPanel: React.FC = () => {
                 className="w-full bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
               />
               <input
+                name="Id"
+                value={newVideo["Id"]}
+                onChange={handleInputChange}
+                placeholder="ID Video (estratto automaticamente)"
+                className="w-full bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
+              />
+              <input
                 name="Titolo breve"
                 value={newVideo["Titolo breve"]}
                 onChange={handleInputChange}
@@ -310,13 +411,16 @@ const AdminPanel: React.FC = () => {
 
       <div className="space-y-4 w-full overflow-x-auto text-xs">
         <div className="flex flex-col md:flex-row gap-4 mb-6 items-center justify-center">
-          <input
-            type="text"
-            placeholder="Cerca..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
-          />
+          <div className="relative w-full max-w-sm">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Cerca..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#050739] text-white pl-10 p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
+            />
+          </div>
         </div>
 
         <div className="rounded-md border border-gray-800">
@@ -464,7 +568,7 @@ const AdminPanel: React.FC = () => {
                             className="bg-red-600 hover:bg-red-700 text-white text-xs"
                             onClick={() => {
                               if (window.confirm('Sei sicuro di voler eliminare questo record?')) {
-                                handleDelete(Number(item.Id));
+                                handleDelete(item.Id);
                               }
                             }}
                           >
@@ -482,19 +586,60 @@ const AdminPanel: React.FC = () => {
 
         {currentItems.length > 0 && (
           <Pagination>
-            <PaginationPrevious 
-              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))} 
-              aria-disabled={currentPage === 1}
-              className="text-white text-xs data-[disabled=true]:opacity-50 data-[disabled=true]:pointer-events-none" 
-            />
-            <PaginationContent className="text-white text-xs">
-              Pagina {currentPage} di {Math.max(1, totalPages)}
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))} 
+                  aria-disabled={currentPage === 1}
+                  className="text-white text-xs data-[disabled=true]:opacity-50 data-[disabled=true]:pointer-events-none" 
+                />
+              </PaginationItem>
+
+              {/* Aggiungi numeri di pagina */}
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                const pageNumber = i + 1;
+                return (
+                  <PaginationItem key={pageNumber}>
+                    <PaginationLink
+                      onClick={() => setCurrentPage(pageNumber)}
+                      isActive={currentPage === pageNumber}
+                      className={`text-white text-xs ${
+                        currentPage === pageNumber ? 'bg-gray-700' : ''
+                      }`}
+                    >
+                      {pageNumber}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+
+              {totalPages > 5 && (
+                <>
+                  <PaginationItem>
+                    <span className="text-white text-xs px-2">...</span>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationLink
+                      onClick={() => setCurrentPage(totalPages)}
+                      isActive={currentPage === totalPages}
+                      className={`text-white text-xs ${
+                        currentPage === totalPages ? 'bg-gray-700' : ''
+                      }`}
+                    >
+                      {totalPages}
+                    </PaginationLink>
+                  </PaginationItem>
+                </>
+              )}
+
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))} 
+                  aria-disabled={currentPage === totalPages || totalPages === 0}
+                  className="text-white text-xs data-[disabled=true]:opacity-50 data-[disabled=true]:pointer-events-none" 
+                />
+              </PaginationItem>
             </PaginationContent>
-            <PaginationNext 
-              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))} 
-              aria-disabled={currentPage === totalPages || totalPages === 0}
-              className="text-white text-xs data-[disabled=true]:opacity-50 data-[disabled=true]:pointer-events-none" 
-            />
           </Pagination>
         )}
       </div>

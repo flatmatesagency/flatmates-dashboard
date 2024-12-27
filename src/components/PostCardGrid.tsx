@@ -16,6 +16,7 @@ interface Post {
   post_creator_name: string;
   platform: string;
   post_published_at: string;
+  created_at: string;
 }
 
 interface PostCardGridProps {

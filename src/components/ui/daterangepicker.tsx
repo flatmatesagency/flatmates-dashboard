@@ -21,10 +21,13 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-export function DatePickerWithRange({
-  className,
-  onChange,
-}: { className?: string; onChange: (range: DateRange | undefined) => void }) {
+interface DatePickerWithRangeProps {
+  className?: string;
+  value?: DateRange | null;
+  onChange: (range: DateRange | undefined) => void;
+}
+
+export function DatePickerWithRange({ className, value, onChange }: DatePickerWithRangeProps) {
   const [date, setDate] = React.useState<DateRange | undefined>({
     from: startOfYear(new Date()),
     to: endOfYear(new Date()),
@@ -110,9 +113,9 @@ export function DatePickerWithRange({
             <Calendar
               initialFocus
               mode="range"
-              defaultMonth={date?.from}
-              selected={date}
-              onSelect={handleDateChange}
+              defaultMonth={value?.from}
+              selected={value || undefined}
+              onSelect={onChange}
               numberOfMonths={2}
             />
           </PopoverContent>

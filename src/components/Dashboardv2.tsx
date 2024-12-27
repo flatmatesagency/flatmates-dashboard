@@ -4,12 +4,6 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/carddashboard';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger
-} from '@/components/ui/tabs';
 import RecentPosts from '@/components/recent-posts';
 import { useEffect, useState } from 'react';
 import {
@@ -27,22 +21,7 @@ import { DatePickerWithRange } from './ui/daterangepicker';
 import PostCardGrid from './PostCardGrid';
 import { DataTable } from './DataTable';
 import { FaEye, FaThumbsUp, FaComment } from 'react-icons/fa';
-
-interface Post {
-  input_id: number;
-  post_thumbnail: string;
-  input_title: string;
-  input_link: string;
-  post_description: string;
-  post_view_count: number;
-  post_like_count: number;
-  post_comment_count: number;
-  input_client: string;
-  post_creator_name: string;
-  platform: string;
-  post_published_at: string;
-}
-
+import { Post } from '@/types/types';
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -326,119 +305,114 @@ export default function DashboardPage() {
 
         {/* Contenuto principale */}
         <div className="p-6 md:p-8">
-          <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="mb-4">
-              <TabsTrigger value="overview" className="text-white px-4 py-2">Overview</TabsTrigger>
-            </TabsList>
-            <TabsContent value="overview" className="space-y-6">
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-                {/* Total Views Card */}
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-white flex items-center gap-2">
-                      <FaEye className="text-lg" /> Total Views
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-white">{formatNumber(totalViews)}</div>
-                  </CardContent>
-                </Card>
+          <div className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+              {/* Total Views Card */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-white flex items-center gap-2">
+                    <FaEye className="text-lg" /> Total Views
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-white">{formatNumber(totalViews)}</div>
+                </CardContent>
+              </Card>
 
-                {/* Likes Card */}
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-white flex items-center gap-2">
-                      <FaThumbsUp className="text-lg" /> Likes
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-white">{formatNumber(totalLikes)}</div>
-                  </CardContent>
-                </Card>
+              {/* Likes Card */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-white flex items-center gap-2">
+                    <FaThumbsUp className="text-lg" /> Likes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-white">{formatNumber(totalLikes)}</div>
+                </CardContent>
+              </Card>
 
-                {/* Comments Card */}
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-white flex items-center gap-2">
-                      <FaComment className="text-lg" /> Comments
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-white">{formatNumber(totalComments)}</div>
-                  </CardContent>
-                </Card>
+              {/* Comments Card */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-white flex items-center gap-2">
+                    <FaComment className="text-lg" /> Comments
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-white">{formatNumber(totalComments)}</div>
+                </CardContent>
+              </Card>
 
-                {/* Engagement Rate Card */}
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-white">
-                      Engagement Rate
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-white">{formatPercentage(engagementRate)}</div>
-                  </CardContent>
-                </Card>
-              </div>
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-7">
-                <Card className="col-span-4">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-white text-xl">Distribuzione delle Visualizzazioni per Piattaforma</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-2 text-white">
-                    <PieChartComponent data={pieChartData} />
-                  </CardContent>
-                </Card>
-                <Card className="col-span-4 md:col-span-3">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-white text-xl">Post Recenti</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-2 text-white">
-                    <RecentPosts 
-                      selectedClient={selectedClient} 
-                      dateRange={dateRange}
-                    />
-                  </CardContent>
-                </Card>
-              </div>
-              <div className="grid grid-cols-1 gap-6">
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-white text-xl">Top 3 Posts per Visualizzazioni</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <PostCardGrid 
-                      posts={[...filteredPosts].sort((a, b) => b.post_view_count - a.post_view_count)} 
-                      maxPosts={3} 
-                    />
-                  </CardContent>
-                </Card>
-              </div>
-              <div className="grid grid-cols-1 gap-6">
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-white text-xl">Top 3 Posts per Like</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <PostCardGrid 
-                      posts={[...filteredPosts].sort((a, b) => b.post_like_count - a.post_like_count)} 
-                      maxPosts={3} 
-                    />
-                  </CardContent>
-                </Card>
-              </div>
-              <div className="grid grid-cols-1 gap-6">
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-white text-xl">Tutti i Post</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <DataTable posts={filteredPosts.map(post => ({...post, input_id: post.input_id.toString()}))} />
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-          </Tabs>
+              {/* Engagement Rate Card */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-white">
+                    Engagement Rate
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-white">{formatPercentage(engagementRate)}</div>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-7">
+              <Card className="col-span-4">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-white text-xl">Distribuzione delle Visualizzazioni per Piattaforma</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-2 text-white">
+                  <PieChartComponent data={pieChartData} />
+                </CardContent>
+              </Card>
+              <Card className="col-span-4 md:col-span-3">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-white text-xl">Post Recenti</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-2 text-white">
+                  <RecentPosts 
+                    selectedClient={selectedClient} 
+                    dateRange={dateRange}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+            <div className="grid grid-cols-1 gap-6">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-white text-xl">Top 3 Posts per Visualizzazioni</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <PostCardGrid 
+                    posts={[...filteredPosts].sort((a, b) => b.post_view_count - a.post_view_count)} 
+                    maxPosts={3} 
+                  />
+                </CardContent>
+              </Card>
+            </div>
+            <div className="grid grid-cols-1 gap-6">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-white text-xl">Top 3 Posts per Like</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <PostCardGrid 
+                    posts={[...filteredPosts].sort((a, b) => b.post_like_count - a.post_like_count)} 
+                    maxPosts={3} 
+                  />
+                </CardContent>
+              </Card>
+            </div>
+            <div className="grid grid-cols-1 gap-6">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-white text-xl">Tutti i Post</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <DataTable posts={filteredPosts.map(post => ({...post, input_id: post.input_id.toString()}))} />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
       </div>
     </>

@@ -14,9 +14,10 @@ interface Post {
   input_client: string;
   post_creator_name: string;
   platform: string;
+  post_published_at: string;
 }
 
-type SortKey = keyof Pick<Post, 'post_view_count' | 'post_like_count' | 'post_comment_count'>;
+type SortKey = keyof Pick<Post, 'post_view_count' | 'post_like_count' | 'post_comment_count' | 'post_published_at'>;
 
 const SocialPostCards: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -54,6 +55,7 @@ const SocialPostCards: React.FC = () => {
   // Extract unique values for dropdowns
   const uniqueInputClients = youtubeChannelTitleFilter ? Array.from(new Set(posts.filter(post => post.post_creator_name === youtubeChannelTitleFilter).map(post => post.input_client))) : Array.from(new Set(posts.map(post => post.input_client)));
   const uniqueYoutubeChannelTitles = inputClientFilter ? Array.from(new Set(posts.filter(post => post.input_client === inputClientFilter).map(post => post.post_creator_name))) : Array.from(new Set(posts.map(post => post.post_creator_name)));
+  const uniquePlatforms = Array.from(new Set(posts.map(post => post.platform)));
 
   // Apply filters to the posts
   let filteredPosts = posts.filter((post) => {
@@ -65,7 +67,12 @@ const SocialPostCards: React.FC = () => {
 
   // Apply sorting to the posts
   if (sortKey) {
-    filteredPosts = [...filteredPosts].sort((a, b) => b[sortKey] - a[sortKey]);
+    filteredPosts = [...filteredPosts].sort((a, b) => {
+      if (sortKey === 'post_published_at') {
+        return new Date(b[sortKey]).getTime() - new Date(a[sortKey]).getTime();
+      }
+      return b[sortKey] - a[sortKey];
+    });
   }
 
   if (loading) return <div>Loading posts...</div>;
@@ -106,28 +113,45 @@ const SocialPostCards: React.FC = () => {
           className="bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
         >
           <option value="">All Platforms</option>
-          <option value="Instagram">Instagram</option>
-          <option value="YouTube">YouTube</option>
+          {uniquePlatforms.map((platform) => (
+            <option key={platform} value={platform}>
+              {platform}
+            </option>
+          ))}
         </select>
       </div>
 
       {/* Sorting Buttons Section */}
       <div className="flex gap-4 mb-6 items-center justify-center">
         <button
+          onClick={() => setSortKey('post_published_at')}
+          className={`bg-transparent text-white p-3 border-b ${
+            sortKey === 'post_published_at' ? 'border-blue-500' : 'border-white'
+          } focus:outline-none focus:ring-0 transition-all duration-300`}
+        >
+          Sort by Date
+        </button>
+        <button
           onClick={() => setSortKey('post_view_count')}
-          className="bg-transparent text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
+          className={`bg-transparent text-white p-3 border-b ${
+            sortKey === 'post_view_count' ? 'border-blue-500' : 'border-white'
+          } focus:outline-none focus:ring-0 transition-all duration-300`}
         >
           Sort by Views
         </button>
         <button
           onClick={() => setSortKey('post_like_count')}
-          className="bg-transparent text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
+          className={`bg-transparent text-white p-3 border-b ${
+            sortKey === 'post_like_count' ? 'border-blue-500' : 'border-white'
+          } focus:outline-none focus:ring-0 transition-all duration-300`}
         >
           Sort by Likes
         </button>
         <button
           onClick={() => setSortKey('post_comment_count')}
-          className="bg-transparent text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
+          className={`bg-transparent text-white p-3 border-b ${
+            sortKey === 'post_comment_count' ? 'border-blue-500' : 'border-white'
+          } focus:outline-none focus:ring-0 transition-all duration-300`}
         >
           Sort by Comments
         </button>
