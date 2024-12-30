@@ -5,6 +5,17 @@ Ecco un README dettagliato per il progetto:
 ## 📋 Descrizione
 FlatScraper è un'applicazione dashboard professionale per il monitoraggio e l'analisi delle performance dei contenuti social media. L'applicazione permette di tracciare metriche chiave come visualizzazioni, like e commenti attraverso diverse piattaforme social (Instagram, YouTube, TikTok).
 
+# TODO
+- [ ] URGENTE: sistemare collegamento con google sheets
+- [ ] Sistemare immagini instagram (problema con i CORS)
+- [ ] Aggiungere API spostando le logiche da hooks a api
+- [ ] Fare in modo che il cron sia all'interno del server /progetto
+- [ ] Aggiungi possibilità di cambiare frequenza di aggiornamento
+- [ ] Quando un post viene aggiunto, lancia lo stesso script del cron per aggiungere direttamente il post in tabella
+- [ ] Aggiungere parte di AI e Analytics avanzata
+- [ ] Sistemare dati Tiktok
+- [ ] Creare tabella utenti per migliore gestione degli accessi su supabase
+
 ## 🚀 Caratteristiche Principali
 
 ### Autenticazione e Sicurezza
@@ -43,7 +54,7 @@ FlatScraper è un'applicazione dashboard professionale per il monitoraggio e l'a
 ### Backend
 - Supabase per database e autenticazione
 - REST API
-- Vercel per il deployment
+- Vercel per il deployment (Questo è ancora da implementare)
 
 ## 📦 Installazione
 
@@ -267,7 +278,7 @@ L'applicazione implementa:
 - Validazione dei dati
 - Gestione sicura delle API keys
 
-## 🌐 Deployment
+## 🌐 Deployment (DA implementare, per ora è deployato su surge.sh)
 L'applicazione è configurata per il deployment su Vercel:
 - Build automatica
 - Integrazione continua
@@ -546,15 +557,6 @@ Questa struttura modulare permette:
 - Testing efficace
 - Scalabilità del progetto
 
-# TODO
-- [ ] URGENTE: sistemare collegamento con google sheets
-- [ ] Sistemare immagini instagram (problema con i CORS)
-- [ ] Aggiungere API spostando le logiche da hooks a api
-- [ ] Fare in modo che il cron sia all'interno del server /progetto
-- [ ] Aggiungi possibilità di cambiare frequenza di aggiornamento
-- [ ] Quando un post viene aggiunto, lancia lo stesso script del cron per aggiungere direttamente il post in tabella
-- [ ] Aggiungere parte di AI e Analytics avanzata
-- [ ] Sistemare dati Tiktok
-- [ ] Creare tabella utenti per migliore gestione degli accessi su supabase
+
 
 
