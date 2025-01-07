@@ -44,9 +44,16 @@ export default function DashboardPage() {
     { name: 'YouTube', value: 0 },
   ]);
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
-  const [dateRange, setDateRange] = useState<{ start: Date | null, end: Date | null }>({
-    start: new Date('2024-01-01'),
-    end: new Date('2024-12-31')
+  const [dateRange, setDateRange] = useState<{ start: Date | null, end: Date | null }>(() => {
+    const end = new Date();
+    const start = new Date();
+    start.setMonth(start.getMonth() - 3);
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+    return {
+      start,
+      end
+    };
   });
  // const [costo, setCosto] = useState<number>(0);
   //const [CPM, setCPM] = useState<number>(0);
@@ -107,9 +114,18 @@ export default function DashboardPage() {
       }
 
       if (dateRange.start && dateRange.end) {
+        const startDate = new Date(dateRange.start);
+        const endDate = new Date(dateRange.end);
+        endDate.setHours(23, 59, 59, 999);
+
         query = query
-          .gte('post_published_at', dateRange.start.toISOString())
-          .lte('post_published_at', dateRange.end.toISOString());
+          .gte('post_published_at', startDate.toISOString())
+          .lte('post_published_at', endDate.toISOString());
+        
+        console.log('Filtering dates:', {
+          start: startDate.toISOString(),
+          end: endDate.toISOString()
+        });
       }
 
       const { data, error } = await query;
@@ -119,8 +135,21 @@ export default function DashboardPage() {
         throw error;
       }
 
-      setFilteredPosts(data || []);
-      setPosts(data || []);
+      console.log('Fetched posts:', data?.length);
+      
+      const filteredData = data?.filter(post => {
+        if (!dateRange.start || !dateRange.end || !post.post_published_at) return true;
+        
+        const postDate = new Date(post.post_published_at);
+        const startDate = new Date(dateRange.start);
+        const endDate = new Date(dateRange.end);
+        endDate.setHours(23, 59, 59, 999);
+        
+        return postDate >= startDate && postDate <= endDate;
+      });
+
+      setFilteredPosts(filteredData || []);
+      setPosts(filteredData || []);
     } catch (err: any) {
       setError('Failed to fetch posts. Please try again later.');
       console.error('Error fetching posts:', err.message);
@@ -130,19 +159,19 @@ export default function DashboardPage() {
   }
 
   const calculateKPIs = (posts: Post[]) => {
-    if (posts.length === 0) return;
-
+    console.log('Calculating KPIs for posts:', posts.length);
+    
     let totalViews = 0;
     let totalLikes = 0;
     let totalComments = 0;
-    let totalCost = 0;
 
     posts.forEach((post) => {
       totalViews += Number(post.post_view_count) || 0;
       totalLikes += Number(post.post_like_count) || 0;
       totalComments += Number(post.post_comment_count) || 0;
-      totalCost += 0;
     });
+
+    console.log('KPI Totals:', { totalViews, totalLikes, totalComments });
 
     setTotalViews(totalViews);
     setTotalLikes(totalLikes);
@@ -153,28 +182,16 @@ export default function DashboardPage() {
     setEngagementRate(engagementRate);
 
     // Like to View Ratio
-    const likeToViewRatio = totalViews > 0 ? totalLikes / totalViews : 0;
+    const likeToViewRatio = totalViews > 0 ? (totalLikes / totalViews) * 100 : 0;
     setLikeToViewRatio(likeToViewRatio);
 
     // Comment to View Ratio
-    const commentToViewRatio = totalViews > 0 ? totalComments / totalViews : 0;
+    const commentToViewRatio = totalViews > 0 ? (totalComments / totalViews) * 100 : 0;
     setCommentToViewRatio(commentToViewRatio);
 
     // Average Views per Post
     const averageViews = posts.length > 0 ? totalViews / posts.length : 0;
     setAverageViewsPerPost(averageViews);
-
-    // Costo
-    //setCosto(totalCost);
-
-    // CPM (Costo per Mille)
-    //const CPM = totalViews > 0 ? (totalCost / totalViews) * 1000 : 0;
-    //setCPM(CPM);
-
-    // CPE (Costo per Engagement)
-    //const totalEngagements = totalLikes + totalComments;
-    //const CPE = totalEngagements > 0 ? totalCost / totalEngagements : 0;
-    //setCPE(CPE);
   };
 
   const updatePieChartData = async () => {
@@ -222,17 +239,44 @@ export default function DashboardPage() {
       }
 
       if (dateRange.start && dateRange.end) {
+        const startDate = new Date(dateRange.start);
+        const endDate = new Date(dateRange.end);
+        endDate.setHours(23, 59, 59, 999);
+
+        console.log('KPI Update - Filtering dates:', {
+          start: startDate.toISOString(),
+          end: endDate.toISOString()
+        });
+
         query = query
-          .gte('post_published_at', dateRange.start.toISOString())
-          .lte('post_published_at', dateRange.end.toISOString());
+          .gte('post_published_at', startDate.toISOString())
+          .lte('post_published_at', endDate.toISOString());
       }
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error in updateKPIs:', error);
+        throw error;
+      }
+
+      console.log('KPI Update - Fetched posts:', data?.length);
+
+      // Filtra i dati anche lato client per sicurezza
+      const filteredData = data?.filter(post => {
+        if (!dateRange.start || !dateRange.end || !post.post_published_at) return true;
+        
+        const postDate = new Date(post.post_published_at);
+        const startDate = new Date(dateRange.start);
+        const endDate = new Date(dateRange.end);
+        endDate.setHours(23, 59, 59, 999);
+        
+        return postDate >= startDate && postDate <= endDate;
+      });
 
       // Reset dei KPI se non ci sono dati
-      if (!data || data.length === 0) {
+      if (!filteredData || filteredData.length === 0) {
+        console.log('KPI Update - No data found, resetting KPIs');
         setTotalViews(0);
         setTotalLikes(0);
         setTotalComments(0);
@@ -240,13 +284,11 @@ export default function DashboardPage() {
         setLikeToViewRatio(0);
         setCommentToViewRatio(0);
         setAverageViewsPerPost(0);
-        //setCosto(0);
-        //setCPM(0);
-        //setCPE(0);
         return;
       }
 
-      calculateKPIs(data);
+      console.log('KPI Update - Calculating KPIs for', filteredData.length, 'posts');
+      calculateKPIs(filteredData);
     } catch (err) {
       console.error('Errore nell\'aggiornamento dei KPI:', err);
       // Reset dei KPI in caso di errore
@@ -257,11 +299,36 @@ export default function DashboardPage() {
       setLikeToViewRatio(0);
       setCommentToViewRatio(0);
       setAverageViewsPerPost(0);
-      //setCosto(0);
-      //setCPM(0);
-      //setCPE(0);
     }
   }
+
+  const handleDateRangeChange = (range: import("react-day-picker").DateRange | undefined) => {
+    if (range?.from && range?.to) {
+      const start = new Date(range.from);
+      start.setHours(0, 0, 0, 0);
+      
+      const end = new Date(range.to);
+      end.setHours(23, 59, 59, 999);
+      
+      console.log('Setting date range:', { start, end });
+      
+      setDateRange({
+        start,
+        end,
+      });
+    } else {
+      const end = new Date();
+      const start = new Date();
+      start.setMonth(start.getMonth() - 3);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+      
+      setDateRange({
+        start,
+        end,
+      });
+    }
+  };
 
   return (
     <>
@@ -283,21 +350,10 @@ export default function DashboardPage() {
               </SelectContent>
             </Select>
             <DatePickerWithRange
-              onChange={(range: import("react-day-picker").DateRange | undefined) => {
-                if (range?.from && range?.to) {
-                  const start = new Date(range.from);
-                  const end = new Date(range.to);
-                  end.setHours(23, 59, 59, 999);
-                  setDateRange({
-                    start,
-                    end,
-                  });
-                } else {
-                  setDateRange({
-                    start: null,
-                    end: null,
-                  });
-                }
+              onChange={handleDateRangeChange}
+              defaultValue={{
+                from: dateRange.start || undefined,
+                to: dateRange.end || undefined
               }}
             />
           </div>

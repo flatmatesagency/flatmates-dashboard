@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { subDays, subMonths, subYears, startOfYear, endOfYear, format } from "date-fns"
+import { format, subDays, subMonths, subYears } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
 import { DateRange } from "react-day-picker"
 
@@ -13,123 +13,124 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 
 interface DatePickerWithRangeProps {
-  className?: string;
-  value?: DateRange | null;
-  onChange: (range: DateRange | undefined) => void;
+  className?: string
+  onChange?: (date: DateRange | undefined) => void
+  defaultValue?: DateRange
 }
 
-export function DatePickerWithRange({ className, value, onChange }: DatePickerWithRangeProps) {
-  const [date, setDate] = React.useState<DateRange | undefined>({
-    from: startOfYear(new Date()),
-    to: endOfYear(new Date()),
-  });
+export function DatePickerWithRange({
+  className,
+  onChange,
+  defaultValue
+}: DatePickerWithRangeProps) {
+  const [date, setDate] = React.useState<DateRange | undefined>(defaultValue)
 
-  const handleDateChange = (selectedDate: DateRange | undefined) => {
-    setDate(selectedDate);
-    onChange(selectedDate);
-  };
+  const handleDateSelect = (selectedDate: DateRange | undefined) => {
+    setDate(selectedDate)
+    onChange?.(selectedDate)
+  }
 
-  const handlePresetChange = (value: string) => {
-    const today = new Date()
-    let newRange: DateRange | undefined;
+  const handleQuickSelect = (days: number) => {
+    const end = new Date()
+    let start: Date
 
-    switch (value) {
-      case "last-7":
-        newRange = { from: subDays(today, 7), to: today }
-        break
-      case "last-30":
-        newRange = { from: subDays(today, 30), to: today }
-        break
-      case "last-month":
-        newRange = { from: subMonths(today, 1), to: today }
-        break
-      case "last-year":
-        newRange = { from: subYears(today, 1), to: today }
-        break
-      case "this-year":
-        newRange = { from: startOfYear(today), to: endOfYear(today) }
-        break
-      case "clear":
-        newRange = undefined
-        break
-      default:
-        return
+    if (days === 7) {
+      start = subDays(end, 7)
+    } else if (days === 30) {
+      start = subDays(end, 30)
+    } else if (days === 90) {
+      start = subMonths(end, 3)
+    } else if (days === 180) {
+      start = subMonths(end, 6)
+    } else {
+      start = subYears(end, 1)
     }
 
-    handleDateChange(newRange)
+    start.setHours(0, 0, 0, 0)
+    end.setHours(23, 59, 59, 999)
+
+    const newRange = { from: start, to: end }
+    setDate(newRange)
+    onChange?.(newRange)
   }
 
   return (
     <div className={cn("grid gap-2", className)}>
-      <div className="flex gap-2">
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              id="date"
-              variant={"outline"}
-              className={cn(
-                "w-[300px] justify-start text-left font-normal",
-                !date && "text-muted-foreground"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {date?.from ? (
-                date.to ? (
-                  <>
-                    {format(date.from, "LLL dd, y")} -{" "}
-                    {format(date.to, "LLL dd, y")}
-                  </>
-                ) : (
-                  format(date.from, "LLL dd, y")
-                )
-              ) : (
-                <span>Pick a date</span>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Select onValueChange={handlePresetChange}>
-              <SelectTrigger className="w-[200px] mb-2">
-                <SelectValue placeholder="Select range" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="last-7">Ultimi 7 giorni</SelectItem>
-                <SelectItem value="last-30">Ultimi 30 giorni</SelectItem>
-                <SelectItem value="last-month">Ultimo mese</SelectItem>
-                <SelectItem value="last-year">Ultimo anno</SelectItem>
-                <SelectItem value="this-year">Anno corrente</SelectItem>
-                <SelectItem value="clear">Cancella selezione</SelectItem>
-              </SelectContent>
-            </Select>
-            <Calendar
-              initialFocus
-              mode="range"
-              defaultMonth={value?.from}
-              selected={value || undefined}
-              onSelect={onChange}
-              numberOfMonths={2}
-            />
-          </PopoverContent>
-        </Popover>
-        {date && (
-          <Button 
-            variant="ghost" 
-            className="px-2" 
-            onClick={() => handleDateChange(undefined)}
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            id="date"
+            variant={"outline"}
+            className={cn(
+              "w-[300px] justify-start text-left font-normal",
+              !date && "text-muted-foreground"
+            )}
           >
-            ✕
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {date?.from ? (
+              date.to ? (
+                <>
+                  {format(date.from, "LLL dd, y")} -{" "}
+                  {format(date.to, "LLL dd, y")}
+                </>
+              ) : (
+                format(date.from, "LLL dd, y")
+              )
+            ) : (
+              <span>Pick a date range</span>
+            )}
           </Button>
-        )}
-      </div>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <div className="flex gap-2 p-2 border-b">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => handleQuickSelect(7)}
+            >
+              7 giorni
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => handleQuickSelect(30)}
+            >
+              30 giorni
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => handleQuickSelect(90)}
+            >
+              3 mesi
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => handleQuickSelect(180)}
+            >
+              6 mesi
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => handleQuickSelect(365)}
+            >
+              1 anno
+            </Button>
+          </div>
+          <Calendar
+            initialFocus
+            mode="range"
+            defaultMonth={date?.from}
+            selected={date}
+            onSelect={handleDateSelect}
+            numberOfMonths={2}
+          />
+        </PopoverContent>
+      </Popover>
     </div>
   )
 }

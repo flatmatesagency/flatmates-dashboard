@@ -7,7 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { format } from "date-fns"
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import {
   Pagination,
   PaginationContent,
@@ -15,6 +15,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import { ArrowUpDown } from "lucide-react"
+import { supabase } from '@/lib/supabase'
 
 interface Post {
   input_id: string;
@@ -40,8 +41,30 @@ export function DataTable({ posts }: DataTableProps) {
     key: keyof Post;
     direction: 'asc' | 'desc';
   } | null>(null);
+  const [thumbnailUrls, setThumbnailUrls] = useState<{ [key: string]: string }>({});
   
   const postsPerPage = 20;
+
+  const getInstagramThumbnailUrl = useCallback(async (originalUrl: string) => {
+    try {
+      const baseFileName = originalUrl.split('/').pop()?.split('?')[0];
+      const fileName = `instagram_${baseFileName}`;
+      
+      const { data } = await supabase
+        .storage
+        .from('Instagram Thumbnails')
+        .getPublicUrl(fileName);
+      
+      if (!data?.publicUrl) {
+        return originalUrl;
+      }
+      
+      return data.publicUrl;
+    } catch (err) {
+      console.error('Errore durante la richiesta del thumbnail:', err);
+      return originalUrl;
+    }
+  }, []);
 
   const handleSort = (key: keyof Post) => {
     setSortConfig((current) => {
@@ -70,6 +93,34 @@ export function DataTable({ posts }: DataTableProps) {
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
   const currentPosts = sortedPosts.slice(indexOfFirstPost, indexOfLastPost);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadThumbnails = async () => {
+      const newUrls: { [key: string]: string } = {};
+      const instagramPosts = currentPosts.filter(post => post.platform === 'Instagram');
+      
+      for (const post of instagramPosts) {
+        if (!thumbnailUrls[post.input_id]) {
+          const url = await getInstagramThumbnailUrl(post.post_thumbnail);
+          if (url !== post.post_thumbnail) {
+            newUrls[post.input_id] = url;
+          }
+        }
+      }
+      
+      if (isMounted && Object.keys(newUrls).length > 0) {
+        setThumbnailUrls(prev => ({...prev, ...newUrls}));
+      }
+    };
+
+    loadThumbnails();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentPosts, getInstagramThumbnailUrl]);
 
   return (
     <div className="space-y-4 w-full overflow-x-auto text-xs">
@@ -126,7 +177,10 @@ export function DataTable({ posts }: DataTableProps) {
                     className="block hover:opacity-80 transition-opacity"
                   >
                     <img 
-                      src={post.post_thumbnail} 
+                      src={post.platform === 'Instagram' 
+                        ? thumbnailUrls[post.input_id] || post.post_thumbnail
+                        : post.post_thumbnail
+                      } 
                       alt={post.input_title}
                       className="w-12 h-12 object-cover rounded cursor-pointer"
                     />

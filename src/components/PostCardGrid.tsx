@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { FaEye, FaThumbsUp, FaComment, FaInstagram, FaYoutube } from 'react-icons/fa';
 import PostSidebar from './PostSidebar';
+import { supabase } from '@/lib/supabase';
 
 interface Post {
   input_id: number;
@@ -26,7 +27,11 @@ interface PostCardGridProps {
 
 const PostCardGrid: React.FC<PostCardGridProps> = ({ posts = [], maxPosts }) => {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-  const displayPosts = maxPosts ? posts.slice(0, maxPosts) : posts;
+  const [thumbnailUrls, setThumbnailUrls] = useState<{ [key: string]: string }>({});
+  
+  const displayPosts = useMemo(() => {
+    return maxPosts ? posts.slice(0, maxPosts) : posts;
+  }, [posts, maxPosts]);
 
   const handlePostClick = (e: React.MouseEvent, post: Post) => {
     e.preventDefault();
@@ -35,6 +40,65 @@ const PostCardGrid: React.FC<PostCardGridProps> = ({ posts = [], maxPosts }) => 
 
   console.log('maxPosts:', maxPosts);
   console.log('displayPosts length:', displayPosts.length);
+
+  const getInstagramThumbnailUrl = useCallback(async (originalUrl: string) => {
+    try {
+      console.log('Richiesta thumbnail per URL:', originalUrl);
+      
+      const baseFileName = originalUrl.split('/').pop()?.split('?')[0];
+      const fileName = `instagram_${baseFileName}`;
+      
+      console.log('Nome file generato:', fileName);
+      
+      const { data } = await supabase
+        .storage
+        .from('Instagram Thumbnails')
+        .getPublicUrl(fileName);
+      
+      if (!data?.publicUrl) {
+        console.error('URL pubblico non trovato');
+        return originalUrl;
+      }
+      
+      console.log('URL pubblico ottenuto:', data.publicUrl);
+      return data.publicUrl;
+    } catch (err) {
+      console.error('Errore durante la richiesta del thumbnail:', err);
+      return originalUrl;
+    }
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadThumbnails = async () => {
+      const newUrls: { [key: string]: string } = {};
+      const instagramPosts = displayPosts.filter(post => post.platform === 'Instagram');
+      
+      const needsUpdate = instagramPosts.some(
+        post => !thumbnailUrls[post.input_id]
+      );
+      
+      if (!needsUpdate) return;
+
+      for (const post of instagramPosts) {
+        if (!thumbnailUrls[post.input_id]) {
+          const url = await getInstagramThumbnailUrl(post.post_thumbnail);
+          newUrls[post.input_id] = url;
+        }
+      }
+      
+      if (isMounted && Object.keys(newUrls).length > 0) {
+        setThumbnailUrls(prev => ({...prev, ...newUrls}));
+      }
+    };
+
+    loadThumbnails();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [displayPosts, getInstagramThumbnailUrl, thumbnailUrls]);
 
   return (
     <div className="relative flex">
@@ -51,7 +115,7 @@ const PostCardGrid: React.FC<PostCardGridProps> = ({ posts = [], maxPosts }) => 
                 <div className="relative w-full h-40">
                   <img
                     src={post.platform === 'Instagram' 
-                      ? `https://cors-anywhere.herokuapp.com/${post.post_thumbnail}` 
+                      ? thumbnailUrls[post.input_id] || post.post_thumbnail
                       : post.post_thumbnail
                     }
                     alt="Post thumbnail"
