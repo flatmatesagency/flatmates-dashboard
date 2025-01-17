@@ -41,7 +41,7 @@ export function DashboardFilters({ onFilterChange, currentFilters, clients }: Da
       </Select>
 
       <DatePickerWithRange
-        value={currentFilters.dateRange}
+        defaultValue={currentFilters.dateRange || undefined}
         onChange={handleDateRangeChange}
       />
     </div>
