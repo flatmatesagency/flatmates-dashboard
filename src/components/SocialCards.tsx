@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'; 
 import PostCardGrid from './PostCardGrid';
 import { supabase } from '@/lib/supabase';
+import { styles } from '@/lib/styles';
+import { cn } from '@/lib/utils';
 
 // Define the type of a post object
 interface Post {
@@ -81,11 +83,11 @@ const SocialPostCards: React.FC = () => {
   return (
     <div className="p-2">
       {/* Filters Section */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6 items-center justify-center">
+      <div className={styles.filters.container}>
         <select
           value={inputClientFilter}
           onChange={(e) => { setInputClientFilter(e.target.value); setYoutubeChannelTitleFilter(''); }}
-          className="bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
+          className={styles.filters.select}
         >
           <option value="">All Clients</option>
           {uniqueInputClients.map((client) => (
@@ -96,7 +98,9 @@ const SocialPostCards: React.FC = () => {
         </select>
 
         <select
-          value={youtubeChannelTitleFilter} onChange={(e) => { setYoutubeChannelTitleFilter(e.target.value); setInputClientFilter(''); }} className="bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
+          value={youtubeChannelTitleFilter}
+          onChange={(e) => { setYoutubeChannelTitleFilter(e.target.value); setInputClientFilter(''); }}
+          className={styles.filters.select}
         >
           <option value="">All Creators</option>
           {uniqueYoutubeChannelTitles.map((channel) => (
@@ -110,7 +114,7 @@ const SocialPostCards: React.FC = () => {
         <select
           value={platformFilter}
           onChange={(e) => setPlatformFilter(e.target.value)}
-          className="bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
+          className={styles.filters.select}
         >
           <option value="">All Platforms</option>
           {uniquePlatforms.map((platform) => (
@@ -122,36 +126,40 @@ const SocialPostCards: React.FC = () => {
       </div>
 
       {/* Sorting Buttons Section */}
-      <div className="flex gap-4 mb-6 items-center justify-center">
+      <div className={styles.sort.container}>
         <button
           onClick={() => setSortKey('post_published_at')}
-          className={`bg-transparent text-white p-3 border-b ${
-            sortKey === 'post_published_at' ? 'border-blue-500' : 'border-white'
-          } focus:outline-none focus:ring-0 transition-all duration-300`}
+          className={cn(
+            styles.sort.button,
+            sortKey === 'post_published_at' ? styles.sort.buttonActive : styles.sort.buttonInactive
+          )}
         >
           Sort by Date
         </button>
         <button
           onClick={() => setSortKey('post_view_count')}
-          className={`bg-transparent text-white p-3 border-b ${
-            sortKey === 'post_view_count' ? 'border-blue-500' : 'border-white'
-          } focus:outline-none focus:ring-0 transition-all duration-300`}
+          className={cn(
+            styles.sort.button,
+            sortKey === 'post_view_count' ? styles.sort.buttonActive : styles.sort.buttonInactive
+          )}
         >
           Sort by Views
         </button>
         <button
           onClick={() => setSortKey('post_like_count')}
-          className={`bg-transparent text-white p-3 border-b ${
-            sortKey === 'post_like_count' ? 'border-blue-500' : 'border-white'
-          } focus:outline-none focus:ring-0 transition-all duration-300`}
+          className={cn(
+            styles.sort.button,
+            sortKey === 'post_like_count' ? styles.sort.buttonActive : styles.sort.buttonInactive
+          )}
         >
           Sort by Likes
         </button>
         <button
           onClick={() => setSortKey('post_comment_count')}
-          className={`bg-transparent text-white p-3 border-b ${
-            sortKey === 'post_comment_count' ? 'border-blue-500' : 'border-white'
-          } focus:outline-none focus:ring-0 transition-all duration-300`}
+          className={cn(
+            styles.sort.button,
+            sortKey === 'post_comment_count' ? styles.sort.buttonActive : styles.sort.buttonInactive
+          )}
         >
           Sort by Comments
         </button>

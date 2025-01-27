@@ -29,9 +29,6 @@ to do generale
 - [ ] implementare i cron job
 - [ ] refactor delle repo
 
-
-=======
->>>>>>> b63112cbaaf501a418401fb6f8f78d01c3d1201e
 ## 🚀 Caratteristiche Principali
 
 ### Autenticazione e Sicurezza

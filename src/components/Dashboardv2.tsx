@@ -20,7 +20,7 @@ import { supabase } from '../lib/supabase'
 import { DatePickerWithRange } from './ui/daterangepicker';
 import PostCardGrid from './PostCardGrid';
 import { DataTable } from './DataTable';
-import { FaEye, FaThumbsUp, FaComment } from 'react-icons/fa';
+import { FaEye, FaThumbsUp, FaComment, FaChartLine } from 'react-icons/fa';
 import { Post } from '@/types/types';
 
 export default function DashboardPage() {
@@ -366,65 +366,65 @@ export default function DashboardPage() {
               {/* Total Views Card */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-white flex items-center gap-2">
+                  <CardTitle className="text-sm font-medium text-card-foreground flex items-center gap-2">
                     <FaEye className="text-lg" /> Total Views
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-white">{formatNumber(totalViews)}</div>
+                  <div className="text-2xl font-bold text-card-foreground">{formatNumber(totalViews)}</div>
                 </CardContent>
               </Card>
 
               {/* Likes Card */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-white flex items-center gap-2">
+                  <CardTitle className="text-sm font-medium text-card-foreground flex items-center gap-2">
                     <FaThumbsUp className="text-lg" /> Likes
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-white">{formatNumber(totalLikes)}</div>
+                  <div className="text-2xl font-bold text-card-foreground">{formatNumber(totalLikes)}</div>
                 </CardContent>
               </Card>
 
               {/* Comments Card */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-white flex items-center gap-2">
+                  <CardTitle className="text-sm font-medium text-card-foreground flex items-center gap-2">
                     <FaComment className="text-lg" /> Comments
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-white">{formatNumber(totalComments)}</div>
+                  <div className="text-2xl font-bold text-card-foreground">{formatNumber(totalComments)}</div>
                 </CardContent>
               </Card>
 
               {/* Engagement Rate Card */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-white">
-                    Engagement Rate
+                  <CardTitle className="text-sm font-medium text-card-foreground flex items-center gap-2">
+                    <FaChartLine className="text-lg" /> Engagement Rate
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-white">{formatPercentage(engagementRate)}</div>
+                  <div className="text-2xl font-bold text-card-foreground">{formatPercentage(engagementRate)}</div>
                 </CardContent>
               </Card>
             </div>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-7">
               <Card className="col-span-4">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-white text-xl">Distribuzione delle Visualizzazioni per Piattaforma</CardTitle>
+                  <CardTitle className="text-card-foreground text-xl">Distribuzione delle Visualizzazioni per Piattaforma</CardTitle>
                 </CardHeader>
-                <CardContent className="pt-2 text-white">
+                <CardContent className="pt-2 text-card-foreground">
                   <PieChartComponent data={pieChartData} />
                 </CardContent>
               </Card>
               <Card className="col-span-4 md:col-span-3">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-white text-xl">Post Recenti</CardTitle>
+                  <CardTitle className="text-card-foreground text-xl">Post Recenti</CardTitle>
                 </CardHeader>
-                <CardContent className="pt-2 text-white">
+                <CardContent className="pt-2 text-card-foreground">
                   <RecentPosts 
                     selectedClient={selectedClient} 
                     dateRange={dateRange}
@@ -435,7 +435,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 gap-6">
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-white text-xl">Top 3 Posts per Visualizzazioni</CardTitle>
+                  <CardTitle className="text-card-foreground text-xl">Top 3 Posts per Visualizzazioni</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <PostCardGrid 
@@ -448,7 +448,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 gap-6">
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-white text-xl">Top 3 Posts per Like</CardTitle>
+                  <CardTitle className="text-card-foreground text-xl">Top 3 Posts per Like</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <PostCardGrid 
@@ -461,7 +461,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 gap-6">
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-white text-xl">Tutti i Post</CardTitle>
+                  <CardTitle className="text-card-foreground text-xl">Tutti i Post</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <DataTable posts={filteredPosts.map(post => ({...post, input_id: post.input_id.toString()}))} />

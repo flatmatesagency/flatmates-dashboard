@@ -28,6 +28,8 @@ import {
 import { ArrowUpDown, Search } from "lucide-react"
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { cn } from '@/lib/utils';
+import { styles } from '@/lib/styles';
 
 interface InputData {
   "Id": string;
@@ -335,10 +337,10 @@ const AdminPanel: React.FC = () => {
   return (
     <div className="space-y-6 p-6 md:p-8">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold tracking-tight text-white">Pannello di Amministrazione</h2>
+        <h2 className="text-2xl font-bold tracking-tight text-card-foreground">Pannello di Amministrazione</h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <button className="bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300">
+            <button className="bg-background text-card-foreground p-3 border-b border-border hover:border-primary focus:outline-none focus:ring-0 transition-all duration-300">
               Aggiungi Video
             </button>
           </DialogTrigger>
@@ -423,47 +425,47 @@ const AdminPanel: React.FC = () => {
           </div>
         </div>
 
-        <div className="rounded-md border border-gray-800">
+        <div className="rounded-md border border-border">
           <Table>
             <TableHeader>
-              <TableRow className="bg-gray-800/50 hover:bg-gray-800/70">
-                <TableHead className="text-white cursor-pointer text-xs font-medium">
+              <TableRow className="bg-muted hover:bg-muted/70">
+                <TableHead className="text-card-foreground cursor-pointer text-xs font-medium">
                   <div className="flex items-center gap-1" onClick={() => handleSort("Id")}>
                     <span>ID</span>
                     <ArrowUpDown className="h-3 w-3" />
                   </div>
                 </TableHead>
-                <TableHead className="text-white cursor-pointer text-xs font-medium">
+                <TableHead className="text-card-foreground cursor-pointer text-xs font-medium">
                   <div className="flex items-center gap-1" onClick={() => handleSort("Link contenuto")}>
                     <span>Link Contenuto</span>
                     <ArrowUpDown className="h-3 w-3" />
                   </div>
                 </TableHead>
-                <TableHead className="text-white cursor-pointer text-xs font-medium">
+                <TableHead className="text-card-foreground cursor-pointer text-xs font-medium">
                   <div className="flex items-center gap-1" onClick={() => handleSort("Titolo breve")}>
                     <span>Titolo Breve</span>
                     <ArrowUpDown className="h-3 w-3" />
                   </div>
                 </TableHead>
-                <TableHead className="text-white cursor-pointer text-xs font-medium">
+                <TableHead className="text-card-foreground cursor-pointer text-xs font-medium">
                   <div className="flex items-center gap-1" onClick={() => handleSort("Cliente")}>
                     <span>Cliente</span>
                     <ArrowUpDown className="h-3 w-3" />
                   </div>
                 </TableHead>
-                <TableHead className="text-white cursor-pointer text-xs font-medium">
+                <TableHead className="text-card-foreground cursor-pointer text-xs font-medium">
                   <div className="flex items-center gap-1" onClick={() => handleSort("Numero offerta")}>
                     <span>Numero offerta</span>
                     <ArrowUpDown className="h-3 w-3" />
                   </div>
                 </TableHead>
-                <TableHead className="text-white cursor-pointer text-xs font-medium">
+                <TableHead className="text-card-foreground cursor-pointer text-xs font-medium">
                   <div className="flex items-center gap-1" onClick={() => handleSort("Costo")}>
                     <span>Costo</span>
                     <ArrowUpDown className="h-3 w-3" />
                   </div>
                 </TableHead>
-                <TableHead className="text-white text-xs font-medium text-right">Azioni</TableHead>
+                <TableHead className="text-card-foreground text-xs font-medium text-right">Azioni</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -471,70 +473,70 @@ const AdminPanel: React.FC = () => {
                 <TableRow>
                   <TableCell 
                     colSpan={7} 
-                    className="text-center text-gray-500 py-4"
+                    className="text-center text-muted-foreground py-4"
                   >
                     Nessun risultato trovato
                   </TableCell>
                 </TableRow>
               ) : (
                 currentItems.map((item) => (
-                  <TableRow key={item.Id} className="border-b border-gray-800 hover:bg-gray-800/50">
-                    <TableCell className="text-white text-xs">{item.Id}</TableCell>
-                    <TableCell className="text-white text-xs">
-                      <a href={item["Link contenuto"] || ''} className="text-blue-400 hover:text-blue-300">
+                  <TableRow key={item.Id} className="border-b border-border hover:bg-muted/50">
+                    <TableCell className="text-card-foreground text-xs">{item.Id}</TableCell>
+                    <TableCell className="text-card-foreground text-xs">
+                      <a href={item["Link contenuto"] || ''} className="text-primary hover:text-primary/80">
                         {item["Link contenuto"]}
                       </a>
                     </TableCell>
-                    <TableCell className="text-white text-xs">
+                    <TableCell className="text-card-foreground text-xs">
                       {editingId === item.Id ? (
                         <Input
                           key={`input-titolo-${item.Id}`}
                           name="Titolo breve"
                           value={editingData?.["Titolo breve"] || ''}
                           onChange={handleEditChange}
-                          className="text-white bg-gray-800"
+                          className="text-card-foreground bg-background"
                         />
                       ) : (
-                        <span className="text-white">{item["Titolo breve"]}</span>
+                        <span className="text-card-foreground">{item["Titolo breve"]}</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-white text-xs">
+                    <TableCell className="text-card-foreground text-xs">
                       {editingId === item.Id ? (
                         <Input
                           key={`input-cliente-${item.Id}`}
                           name="Cliente"
                           value={editingData?.["Cliente"] || ''}
                           onChange={handleEditChange}
-                          className="text-white bg-gray-800"
+                          className="text-card-foreground bg-background"
                         />
                       ) : (
-                        <span className="text-white">{item["Cliente"]}</span>
+                        <span className="text-card-foreground">{item["Cliente"]}</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-white text-xs">
+                    <TableCell className="text-card-foreground text-xs">
                       {editingId === item.Id ? (
                         <Input
                           key={`input-offerta-${item.Id}`}
                           name="Numero offerta"
                           value={editingData?.["Numero offerta"] || ''}
                           onChange={handleEditChange}
-                          className="text-white bg-gray-800"
+                          className="text-card-foreground bg-background"
                         />
                       ) : (
-                        <span className="text-white">{item["Numero offerta"]}</span>
+                        <span className="text-card-foreground">{item["Numero offerta"]}</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-white text-xs">
+                    <TableCell className="text-card-foreground text-xs">
                       {editingId === item.Id ? (
                         <Input
                           key={`input-Costo-${item.Id}`}
                           name="Costo"
                           value={editingData?.["Costo"] || ''}
                           onChange={handleEditChange}
-                          className="text-white bg-gray-800"
+                          className="text-card-foreground bg-background"
                         />
                       ) : (
-                        <span className="text-white">{item["Costo"]}</span>
+                        <span className="text-card-foreground">{item["Costo"]}</span>
                       )}
                     </TableCell>
                     <TableCell className="text-right">
@@ -585,13 +587,13 @@ const AdminPanel: React.FC = () => {
         </div>
 
         {currentItems.length > 0 && (
-          <Pagination>
+          <Pagination className={styles.pagination.container}>
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious 
                   onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))} 
                   aria-disabled={currentPage === 1}
-                  className="text-white text-xs data-[disabled=true]:opacity-50 data-[disabled=true]:pointer-events-none" 
+                  className={styles.pagination.nav}
                 />
               </PaginationItem>
 
@@ -599,13 +601,14 @@ const AdminPanel: React.FC = () => {
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                 const pageNumber = i + 1;
                 return (
-                  <PaginationItem key={pageNumber}>
+                  <PaginationItem key={pageNumber} className={styles.pagination.item}>
                     <PaginationLink
                       onClick={() => setCurrentPage(pageNumber)}
                       isActive={currentPage === pageNumber}
-                      className={`text-white text-xs ${
-                        currentPage === pageNumber ? 'bg-gray-700' : ''
-                      }`}
+                      className={cn(
+                        styles.pagination.link,
+                        currentPage === pageNumber ? styles.pagination.activeLink : styles.pagination.inactiveLink
+                      )}
                     >
                       {pageNumber}
                     </PaginationLink>
@@ -615,16 +618,17 @@ const AdminPanel: React.FC = () => {
 
               {totalPages > 5 && (
                 <>
-                  <PaginationItem>
-                    <span className="text-white text-xs px-2">...</span>
+                  <PaginationItem className={styles.pagination.item}>
+                    <span className={styles.pagination.ellipsis}>...</span>
                   </PaginationItem>
-                  <PaginationItem>
+                  <PaginationItem className={styles.pagination.item}>
                     <PaginationLink
                       onClick={() => setCurrentPage(totalPages)}
                       isActive={currentPage === totalPages}
-                      className={`text-white text-xs ${
-                        currentPage === totalPages ? 'bg-gray-700' : ''
-                      }`}
+                      className={cn(
+                        styles.pagination.link,
+                        currentPage === totalPages ? styles.pagination.activeLink : styles.pagination.inactiveLink
+                      )}
                     >
                       {totalPages}
                     </PaginationLink>
@@ -636,7 +640,7 @@ const AdminPanel: React.FC = () => {
                 <PaginationNext 
                   onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))} 
                   aria-disabled={currentPage === totalPages || totalPages === 0}
-                  className="text-white text-xs data-[disabled=true]:opacity-50 data-[disabled=true]:pointer-events-none" 
+                  className={styles.pagination.nav}
                 />
               </PaginationItem>
             </PaginationContent>

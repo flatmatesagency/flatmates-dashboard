@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { FaEye, FaThumbsUp, FaComment, FaTimes, FaExternalLinkAlt } from 'react-icons/fa';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import supabase from '../lib/supabase';
+import { styles } from '@/lib/styles';
+import { cn } from '@/lib/utils';
 
 interface Post {
   input_id: number;
@@ -234,12 +236,12 @@ const PostSidebar: React.FC<PostSidebarProps> = ({ post, onClose }) => {
     return (
       <div className="mt-8">
         <div className="mb-4 flex justify-between items-center">
-          <h3 className="text-lg font-bold text-white">Andamento nel Tempo</h3>
+          <h3 className="text-lg font-bold text-card-foreground">Andamento nel Tempo</h3>
           <div className="flex gap-4 items-center">
             <select
               value={selectedTimeRange}
               onChange={(e) => setSelectedTimeRange(Number(e.target.value))}
-              className="bg-[#0a0d4c] text-white p-2 rounded-lg text-sm"
+              className="bg-background text-card-foreground p-2 rounded-lg text-sm border border-border"
             >
               {TIME_RANGES.map((range) => (
                 <option key={range.days} value={range.days}>
@@ -250,7 +252,7 @@ const PostSidebar: React.FC<PostSidebarProps> = ({ post, onClose }) => {
             <select
               value={selectedMetric}
               onChange={(e) => setSelectedMetric(e.target.value as MetricType)}
-              className="bg-[#0a0d4c] text-white p-2 rounded-lg text-sm"
+              className="bg-background text-card-foreground p-2 rounded-lg text-sm border border-border"
             >
               <option value="viewCount">Visualizzazioni</option>
               <option value="likeCount">Like</option>
@@ -264,29 +266,42 @@ const PostSidebar: React.FC<PostSidebarProps> = ({ post, onClose }) => {
             <LineChart data={platformData}>
               <XAxis 
                 dataKey="Insert_Timestamp" 
-                stroke="#fff"
-                tick={{ fill: '#fff' }}
+                stroke="currentColor"
+                tick={{ fill: 'currentColor' }}
                 tickFormatter={formatDate}
                 interval="preserveStartEnd"
+                className="text-card-foreground"
               />
               <YAxis 
-                stroke="#fff"
-                tick={{ fill: '#fff' }}
+                stroke="currentColor"
+                tick={{ fill: 'currentColor' }}
                 tickFormatter={formatMetric}
+                className="text-card-foreground"
               />
               <Tooltip 
-                contentStyle={{ backgroundColor: '#0a0d4c', border: 'none' }}
-                labelStyle={{ color: '#fff' }}
-                itemStyle={{ color: '#fff' }}
+                contentStyle={{ 
+                  backgroundColor: 'hsl(var(--background))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '8px',
+                  padding: '8px'
+                }}
+                labelStyle={{ color: 'hsl(var(--card-foreground))' }}
+                itemStyle={{ color: 'hsl(var(--card-foreground))' }}
                 formatter={(value: number) => [formatMetric(value), METRIC_LABELS[selectedMetric]]}
                 labelFormatter={(label) => formatDate(label as string)}
               />
               <Line 
                 type="monotone" 
                 dataKey={selectedMetricField}
-                stroke="#E5E6FC" 
+                stroke="hsl(var(--primary))"
                 strokeWidth={2}
                 dot={false}
+                activeDot={{ 
+                  stroke: 'hsl(var(--primary))',
+                  strokeWidth: 2,
+                  r: 4,
+                  fill: 'hsl(var(--background))'
+                }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -297,14 +312,14 @@ const PostSidebar: React.FC<PostSidebarProps> = ({ post, onClose }) => {
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 z-[9999]"
+      className="fixed inset-0 bg-black/50 z-[9999]"
       onClick={handleOverlayClick}
     >
-      <div className="fixed top-0 right-0 h-full w-[70%] bg-[#050739] border-l border-gray-700 shadow-xl transform transition-transform duration-300 ease-in-out overflow-y-auto z-[10000]">
+      <div className="fixed top-0 right-0 h-full w-[70%] bg-background border-l border-border shadow-xl transform transition-transform duration-300 ease-in-out overflow-y-auto z-[10000]">
         <div className="p-6">
           <button 
             onClick={onClose}
-            className="absolute top-4 right-4 text-white hover:text-gray-300"
+            className="absolute top-4 right-4 text-card-foreground hover:text-muted-foreground"
           >
             <FaTimes size={24} />
           </button>
@@ -321,9 +336,9 @@ const PostSidebar: React.FC<PostSidebarProps> = ({ post, onClose }) => {
                   href={post.input_link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"
+                  className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"
                 >
-                  <div className="flex items-center gap-2 bg-[#050739] px-4 py-2 rounded-lg text-white">
+                  <div className="flex items-center gap-2 bg-background px-4 py-2 rounded-lg text-card-foreground">
                     <FaExternalLinkAlt size={16} />
                     <span>Apri Video</span>
                   </div>
@@ -332,25 +347,25 @@ const PostSidebar: React.FC<PostSidebarProps> = ({ post, onClose }) => {
             </div>
 
             <div className="w-1/2">
-              <h2 className="text-xl font-bold text-white mb-4">{post.input_title}</h2>
-              <p className="text-gray-300 mb-6">
+              <h2 className="text-xl font-bold text-card-foreground mb-4">{post.input_title}</h2>
+              <p className="text-muted-foreground mb-6">
                 {truncateDescription(post.post_description)}
               </p>
 
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="text-white">
+                <div className="text-card-foreground">
                   <p className="font-bold">Client</p>
                   <p>{post.input_client}</p>
                 </div>
-                <div className="text-white">
+                <div className="text-card-foreground">
                   <p className="font-bold">Creator</p>
                   <p>{post.post_creator_name}</p>
                 </div>
-                <div className="text-white">
+                <div className="text-card-foreground">
                   <p className="font-bold">Data Pubblicazione</p>
                   <p>{formatFullDate(post.post_published_at)}</p>
                 </div>
-                <div className="text-white">
+                <div className="text-card-foreground">
                   <p className="font-bold">Data Inserimento</p>
                   <p>
                     {firstInsertDate 
@@ -364,9 +379,9 @@ const PostSidebar: React.FC<PostSidebarProps> = ({ post, onClose }) => {
           </div>
 
           <div className="mt-6">
-            <h3 className="text-lg font-bold text-white mb-4">Statistiche della Piattaforma</h3>
+            <h3 className="text-lg font-bold text-card-foreground mb-4">Statistiche della Piattaforma</h3>
             {loading ? (
-              <p className="text-white">Caricamento statistiche...</p>
+              <p className="text-card-foreground">Caricamento statistiche...</p>
             ) : platformData ? (
               <div className="grid grid-cols-3 gap-4">
                 {(['viewCount', 'likeCount', 'commentCount'] as MetricType[]).map((metric) => {
@@ -376,20 +391,23 @@ const PostSidebar: React.FC<PostSidebarProps> = ({ post, onClose }) => {
                   const isPositive = growth.absolute >= 0;
                   
                   return (
-                    <div key={metric} className="bg-[#0a0d4c] p-4 rounded-lg">
-                      <div className="flex items-center gap-2 text-gray-300">
+                    <div key={metric} className="bg-muted p-4 rounded-lg">
+                      <div className="flex items-center gap-2 text-muted-foreground">
                         {metric === 'viewCount' && <FaEye />}
                         {metric === 'likeCount' && <FaThumbsUp />}
                         {metric === 'commentCount' && <FaComment />}
                         <p>{METRIC_LABELS[metric]}</p>
                       </div>
-                      <p className="text-white text-xl font-bold mb-2">
+                      <p className="text-card-foreground text-xl font-bold mb-2">
                         {formatMetric(Number(currentValue))}
                       </p>
-                      <div className={`text-sm ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+                      <div className={cn(
+                        "text-sm",
+                        isPositive ? "text-green-500" : "text-red-500"
+                      )}>
                         <span>{isPositive ? '↑' : '↓'} </span>
                         <span>{Math.abs(growth.percentage).toFixed(1)}% </span>
-                        <span className="text-gray-400">
+                        <span className="text-muted-foreground">
                           ({isPositive ? '+' : ''}{formatMetric(growth.absolute)})
                         </span>
                       </div>
@@ -398,12 +416,12 @@ const PostSidebar: React.FC<PostSidebarProps> = ({ post, onClose }) => {
                 })}
               </div>
             ) : (
-              <p className="text-white">Nessun dato disponibile</p>
+              <p className="text-card-foreground">Nessun dato disponibile</p>
             )}
           </div>
 
           {loading ? (
-            <p className="text-white">Caricamento dati...</p>
+            <p className="text-card-foreground">Caricamento dati...</p>
           ) : (
             renderChart()
           )}
