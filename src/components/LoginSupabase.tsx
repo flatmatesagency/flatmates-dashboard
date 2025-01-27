@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { FcGoogle } from 'react-icons/fc';
 
 const Login: React.FC<{ onLoginSuccess: () => void }> = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -33,12 +34,23 @@ const Login: React.FC<{ onLoginSuccess: () => void }> = ({ onLoginSuccess }) => 
     }
   };
 
+  const handleGoogleLogin = async () => {
+    try {
+      setError('');
+      const { error } = await loginWithGoogle();
+      if (error) throw error;
+    } catch (error: any) {
+      console.error('Errore durante il login con Google:', error);
+      setError(error.message || 'Errore durante il login con Google');
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#050739]">
-      <div className="bg-white/10 p-8 rounded-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold text-white mb-6 text-center">Login</h2>
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="bg-card p-8 rounded-lg w-full max-w-md border border-border">
+        <h2 className="text-2xl font-bold text-card-foreground mb-6 text-center">Login</h2>
         {error && (
-          <div className="bg-red-500/10 border border-red-500 text-red-500 p-3 rounded mb-4">
+          <div className="bg-destructive/10 border border-destructive text-destructive p-3 rounded mb-4">
             {error}
           </div>
         )}
@@ -49,7 +61,7 @@ const Login: React.FC<{ onLoginSuccess: () => void }> = ({ onLoginSuccess }) => 
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 rounded bg-white/5 border border-white/10 text-white"
+              className="w-full p-3 rounded bg-background border border-input text-card-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               required
             />
           </div>
@@ -59,18 +71,38 @@ const Login: React.FC<{ onLoginSuccess: () => void }> = ({ onLoginSuccess }) => 
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 rounded bg-white/5 border border-white/10 text-white"
+              className="w-full p-3 rounded bg-background border border-input text-card-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               required
             />
           </div>
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-blue-600 text-white p-3 rounded font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="w-full bg-primary text-primary-foreground p-3 rounded font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
             {isLoading ? 'Accesso in corso...' : 'Accedi'}
           </button>
         </form>
+
+        <div className="mt-6">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">Oppure continua con</span>
+            </div>
+          </div>
+
+          <button
+            onClick={handleGoogleLogin}
+            type="button"
+            className="mt-4 w-full bg-background text-card-foreground p-3 rounded font-medium border border-input hover:bg-muted transition-colors flex items-center justify-center gap-2"
+          >
+            <FcGoogle className="w-5 h-5" />
+            Google
+          </button>
+        </div>
       </div>
     </div>
   );

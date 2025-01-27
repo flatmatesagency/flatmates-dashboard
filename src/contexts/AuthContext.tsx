@@ -9,6 +9,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<any>;
+  loginWithGoogle: () => Promise<any>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -58,6 +59,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return { data, error: null };
     } catch (error) {
       console.error('Errore login:', error);
+      return { data: null, error };
+    }
+  };
+
+  const loginWithGoogle = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+        }
+      });
+      
+      if (error) throw error;
+      
+      // Note: Non è necessario impostare manualmente user e isAuthenticated qui
+      // perché verranno gestiti dall'evento onAuthStateChange
+      
+      return { data, error: null };
+    } catch (error) {
+      console.error('Errore login Google:', error);
       return { data: null, error };
     }
   };
@@ -123,6 +145,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     <AuthContext.Provider value={{
       user,
       login,
+      loginWithGoogle,
       logout,
       isAuthenticated,
       isLoading,

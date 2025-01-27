@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { FaEye, FaThumbsUp, FaComment, FaTimes, FaExternalLinkAlt } from 'react-icons/fa';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import supabase from '../lib/supabase';
-import { styles } from '@/lib/styles';
 import { cn } from '@/lib/utils';
 
 interface Post {
