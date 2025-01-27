@@ -6,16 +6,14 @@ Ecco un README dettagliato per il progetto:
 FlatScraper è un'applicazione dashboard professionale per il monitoraggio e l'analisi delle performance dei contenuti social media. L'applicazione permette di tracciare metriche chiave come visualizzazioni, like e commenti attraverso diverse piattaforme social (Instagram, YouTube, TikTok).
 
 # TODO
-<<<<<<< HEAD
+
 - [x] URGENTE: sistemare collegamento con google sheets
 - [x] Sistemare immagini instagram (problema con i CORS)
 - [ ] Aggiungere API spostando le logiche da hooks a api (lo faccio su un nuovo branch)
 - [ ] Sistemare immagini tiktok
-=======
 - [ ] URGENTE: sistemare collegamento con google sheets
 - [ ] Sistemare immagini instagram (problema con i CORS)
 - [ ] Aggiungere API spostando le logiche da hooks a api
->>>>>>> b63112cbaaf501a418401fb6f8f78d01c3d1201e
 - [ ] Fare in modo che il cron sia all'interno del server /progetto
 - [ ] Aggiungi possibilità di cambiare frequenza di aggiornamento
 - [ ] Quando un post viene aggiunto, lancia lo stesso script del cron per aggiungere direttamente il post in tabella
@@ -23,7 +21,13 @@ FlatScraper è un'applicazione dashboard professionale per il monitoraggio e l'a
 - [ ] Sistemare dati Tiktok
 - [ ] Creare tabella utenti per migliore gestione degli accessi su supabase
 
-<<<<<<< HEAD
+to do generale
+- [ ] spostare supabase
+- [ ] spostare repo
+- [ ] mettere colori belli
+- [ ] pipeline di deplooyment sensata
+- [ ] implementare i cron job
+- [ ] refactor delle repo
 
 
 =======
