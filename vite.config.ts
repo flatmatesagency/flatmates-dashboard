@@ -15,6 +15,7 @@ export default defineConfig({
       }
     }
   },
+  base: '/flatscraper/',
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
