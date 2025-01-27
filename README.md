@@ -9,6 +9,7 @@ FlatScraper è un'applicazione dashboard professionale per il monitoraggio e l'a
 
 - [x] URGENTE: sistemare collegamento con google sheets
 - [x] Sistemare immagini instagram (problema con i CORS)
+- [ ] Fai aprtire il deploy
 - [ ] Aggiungere API spostando le logiche da hooks a api (lo faccio su un nuovo branch)
 - [ ] Sistemare immagini tiktok
 - [ ] URGENTE: sistemare collegamento con google sheets
