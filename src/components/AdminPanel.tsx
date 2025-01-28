@@ -56,6 +56,8 @@ const AdminPanel: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingData, setEditingData] = useState<InputData | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
+  const [bulkLinks, setBulkLinks] = useState("");
   const [, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -334,81 +336,172 @@ const AdminPanel: React.FC = () => {
   const totalPages = Math.ceil(filteredAndSortedData.length / itemsPerPage);
   const currentItems = filteredAndSortedData.slice(indexOfFirstItem, indexOfLastItem);
 
+  const handleBulkSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      // Dividi il testo incollato in righe
+      const links = bulkLinks.split('\n').filter(link => link.trim());
+      
+      // Prepara i record da inserire
+      const records = links.map(link => {
+        let videoId = null;
+        const patterns = [
+          /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i,
+          /(?:vimeo\.com\/(?:video\/)?)([\d]+)/i
+        ];
+
+        for (const pattern of patterns) {
+          const match = link.match(pattern);
+          if (match && match[1]) {
+            videoId = match[1];
+            break;
+          }
+        }
+
+        return {
+          "Id": videoId || null,
+          "Link contenuto": link.trim(),
+          "Titolo breve": null,
+          "Cliente": null,
+          "Numero offerta": null,
+          "Costo": null
+        };
+      });
+
+      // Inserisci tutti i record
+      const { error } = await supabase
+        .from('Input Tablev2')
+        .insert(records);
+
+      if (error) {
+        console.error('Errore nell\'inserimento di massa:', error);
+        return;
+      }
+
+      console.log('Record inseriti con successo');
+      setBulkLinks("");
+      setIsBulkDialogOpen(false);
+      fetchInputData();
+    } catch (error) {
+      console.error('Errore durante l\'inserimento di massa:', error);
+    }
+  };
+
   return (
     <div className="space-y-6 p-6 md:p-8">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold tracking-tight text-card-foreground">Pannello di Amministrazione</h2>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <button className="bg-background text-card-foreground p-3 border-b border-border hover:border-primary focus:outline-none focus:ring-0 transition-all duration-300">
-              Aggiungi Video
-            </button>
-          </DialogTrigger>
-          <DialogContent className="bg-[#050739] border border-white">
-            <DialogHeader className="mb-4">
-              <DialogTitle className="text-xl font-semibold text-white">Aggiungi Nuovo Video</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                name="Link contenuto"
-                value={newVideo["Link contenuto"]}
-                onChange={handleInputChange}
-                placeholder="Link del contenuto"
-                className="w-full bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
-              />
-              <input
-                name="Id"
-                value={newVideo["Id"]}
-                onChange={handleInputChange}
-                placeholder="ID Video (estratto automaticamente)"
-                className="w-full bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
-              />
-              <input
-                name="Titolo breve"
-                value={newVideo["Titolo breve"]}
-                onChange={handleInputChange}
-                placeholder="Titolo breve"
-                className="w-full bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
-              />
-              <input
-                name="Cliente"
-                value={newVideo["Cliente"]}
-                onChange={handleInputChange}
-                placeholder="Cliente"
-                className="w-full bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
-              />
-              <input
-                name="Numero offerta"
-                value={newVideo["Numero offerta"]}
-                onChange={handleInputChange}
-                placeholder="Numero offerta"
-                className="w-full bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
-              />
-              <input
-                name="Costo"
-                value={newVideo["Costo"]}
-                onChange={handleInputChange}
-                placeholder="Costo"
-                className="w-full bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
-              />
-              <div className="flex justify-end gap-4 mt-6">
-                <button 
-                  type="button" 
-                  onClick={() => setIsDialogOpen(false)}
-                  className="bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
-                >
-                  Annulla
-                </button>
-                <button 
-                  type="submit"
-                  className="bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
-                >
-                  Aggiungi Record
-                </button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <div className="flex gap-4">
+          <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
+            <DialogTrigger asChild>
+              <button className="bg-background text-card-foreground p-3 border-b border-border hover:border-primary focus:outline-none focus:ring-0 transition-all duration-300">
+                Importa Video da Excel
+              </button>
+            </DialogTrigger>
+            <DialogContent className="bg-[#050739] border border-white">
+              <DialogHeader className="mb-4">
+                <DialogTitle className="text-xl font-semibold text-white">Importa Video da Excel</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleBulkSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm text-white">Incolla i link dei video (uno per riga)</label>
+                  <textarea
+                    value={bulkLinks}
+                    onChange={(e) => setBulkLinks(e.target.value)}
+                    placeholder="https://youtube.com/watch?v=xxx&#10;https://youtube.com/watch?v=yyy&#10;..."
+                    className="w-full h-48 bg-[#050739] text-white p-3 border border-white focus:outline-none focus:ring-0 transition-all duration-300"
+                  />
+                </div>
+                <div className="flex justify-end gap-4 mt-6">
+                  <button 
+                    type="button" 
+                    onClick={() => setIsBulkDialogOpen(false)}
+                    className="bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
+                  >
+                    Annulla
+                  </button>
+                  <button 
+                    type="submit"
+                    className="bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
+                  >
+                    Importa Video
+                  </button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <button className="bg-background text-card-foreground p-3 border-b border-border hover:border-primary focus:outline-none focus:ring-0 transition-all duration-300">
+                Aggiungi Video
+              </button>
+            </DialogTrigger>
+            <DialogContent className="bg-[#050739] border border-white">
+              <DialogHeader className="mb-4">
+                <DialogTitle className="text-xl font-semibold text-white">Aggiungi Nuovo Video</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <input
+                  name="Link contenuto"
+                  value={newVideo["Link contenuto"]}
+                  onChange={handleInputChange}
+                  placeholder="Link del contenuto"
+                  className="w-full bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
+                />
+                <input
+                  name="Id"
+                  value={newVideo["Id"]}
+                  onChange={handleInputChange}
+                  placeholder="ID Video (estratto automaticamente)"
+                  className="w-full bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
+                />
+                <input
+                  name="Titolo breve"
+                  value={newVideo["Titolo breve"]}
+                  onChange={handleInputChange}
+                  placeholder="Titolo breve"
+                  className="w-full bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
+                />
+                <input
+                  name="Cliente"
+                  value={newVideo["Cliente"]}
+                  onChange={handleInputChange}
+                  placeholder="Cliente"
+                  className="w-full bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
+                />
+                <input
+                  name="Numero offerta"
+                  value={newVideo["Numero offerta"]}
+                  onChange={handleInputChange}
+                  placeholder="Numero offerta"
+                  className="w-full bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
+                />
+                <input
+                  name="Costo"
+                  value={newVideo["Costo"]}
+                  onChange={handleInputChange}
+                  placeholder="Costo"
+                  className="w-full bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
+                />
+                <div className="flex justify-end gap-4 mt-6">
+                  <button 
+                    type="button" 
+                    onClick={() => setIsDialogOpen(false)}
+                    className="bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
+                  >
+                    Annulla
+                  </button>
+                  <button 
+                    type="submit"
+                    className="bg-[#050739] text-white p-3 border-b border-white focus:outline-none focus:ring-0 transition-all duration-300"
+                  >
+                    Aggiungi Record
+                  </button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <div className="space-y-4 w-full overflow-x-auto text-xs">
