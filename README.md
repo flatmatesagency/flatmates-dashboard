@@ -23,10 +23,10 @@ FlatScraper è un'applicazione dashboard professionale per il monitoraggio e l'a
 - [ ] Creare tabella utenti per migliore gestione degli accessi su supabase
 
 to do generale
-- [ ] spostare supabase
+- [x] spostare supabase
 - [ ] spostare repo
-- [ ] mettere colori belli
-- [ ] pipeline di deplooyment sensata
+- [x] mettere colori belli
+- [x] pipeline di deplooyment sensata
 - [ ] implementare i cron job
 - [ ] refactor delle repo
 
