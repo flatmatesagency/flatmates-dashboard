@@ -8,14 +8,14 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: process.env.VERCEL_URL || 'http://localhost:3000',
+        target: process.env.VITE_API_URL || 'http://localhost:3000',
         changeOrigin: true,
-        secure: false,
+        secure: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       }
     }
   },
-  base: '/flatscraper/',
+  base: '/flat-scraper/',
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
