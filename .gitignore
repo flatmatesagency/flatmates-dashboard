@@ -27,3 +27,10 @@ dist-ssr
 .env
 .env.local
 /old_api/
+
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
