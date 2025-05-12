@@ -23,17 +23,17 @@ export const styles = {
 
   // Post Card specifica
   postCard: {
-    wrapper: "w-full max-w-sm flex flex-col justify-between bg-transparent text-card-foreground overflow-hidden border-none",
-    imageWrapper: "relative w-full h-40",
-    image: "w-full h-full object-cover filter grayscale contrast-125 hover:filter-none transition-all duration-300 p-0",
-    overlay: "absolute inset-0 bg-card opacity-40 hover:opacity-0 transition-all duration-300",
+    wrapper: "bg-white w-full",
+    imageWrapper: "relative block w-full h-[212px]",
+    image: "w-full h-[212px] object-cover object-center block",
+    overlay: "absolute inset-0 bg-black/5",
     platformIcon: "absolute top-2 right-2 p-1 rounded-full",
-    content: "p-4 flex flex-col justify-between flex-1",
-    title: "text-base font-medium mb-2 text-center text-card-foreground hover:text-primary transition-colors duration-300",
-    description: "text-xs mb-4 text-muted-foreground",
-    metadata: "flex justify-between text-sm text-muted-foreground mb-4",
-    stats: "mt-auto pt-4 border-t border-border",
-    statsWrapper: "flex justify-between text-sm text-card-foreground",
+    content: "pt-6 block",
+    title: "text-lg font-medium mb-3 text-left text-card-foreground",
+    description: "text-sm mb-6 text-muted-foreground",
+    metadata: "grid grid-cols-2 gap-6 mb-6 text-sm",
+    stats: "pt-4 mt-auto",
+    statsWrapper: "flex items-center gap-6 text-sm text-card-foreground",
     statItem: "flex items-center gap-1 font-bold",
   },
 

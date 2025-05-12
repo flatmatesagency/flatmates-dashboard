@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -19,7 +21,6 @@
     --accent-foreground: 231 71% 24%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 231 71% 24%;
     --chart-1: 12 76% 61%;
@@ -27,7 +28,7 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   }
   .dark {
     --background: 231 82% 12%;
@@ -46,7 +47,6 @@
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 100%;
-    --border: 231 71% 28%;
     --input: 231 71% 28%;
     --ring: 0 0% 100%;
     --chart-1: 220 70% 50%;
@@ -58,7 +58,6 @@
 }
 @layer base {
   * {
-    @apply border-border;
   }
   body {
     @apply bg-background text-foreground font-sans;

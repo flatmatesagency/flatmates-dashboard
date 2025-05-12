@@ -77,11 +77,11 @@ const PostCardGrid: React.FC<PostCardGridProps> = ({ posts, maxPosts = Infinity 
   }, [displayPosts, getInstagramThumbnailUrl, thumbnailUrls]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 border-b border-border pb-6 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 pb-6">
       {displayPosts.map((post) => (
         <Card 
           key={post.input_id} 
-          className={cn(styles.postCard.wrapper, "cursor-pointer")}
+          className={cn(styles.postCard.wrapper, "cursor-pointer last:pr-0")}
           onClick={(e) => handlePostClick(e, post)}
         >
           <CardHeader className="relative flex items-center justify-center h-52 p-0 m-0">
