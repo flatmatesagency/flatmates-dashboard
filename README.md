@@ -356,7 +356,7 @@ src/
 - `Select.tsx` - Menu a tendina personalizzato
 
 ### 2. Componenti Dashboard (`/src/components/dashboard/`)
-````typescript:src/components/dashboard/Dashboard.tsx
+```typescript:src/components/dashboard/Dashboard.tsx
 export function Dashboard() {
   // ... codice esistente ...
 
@@ -369,10 +369,10 @@ export function Dashboard() {
     </div>
   );
 }
-````
+```
 
 ### 3. Componenti Post (`/src/components/posts/`)
-````typescript:src/components/posts/PostCard.tsx
+```typescript:src/components/posts/PostCard.tsx
 interface PostCardProps {
   post: {
     input_id: string;
@@ -401,10 +401,10 @@ export function PostCard({ post }: PostCardProps) {
     </Card>
   );
 }
-````
+```
 
 ### 4. Componenti Statistiche (`/src/components/stats/`)
-````typescript:src/components/stats/StatsCard.tsx
+```typescript:src/components/stats/StatsCard.tsx
 interface StatsCardProps {
   title: string;
   value: number;
@@ -435,12 +435,12 @@ export function StatsCard({
     </Card>
   );
 }
-````
+```
 
 ## 🎯 Funzionalità Principali
 
 ### 1. Sistema di Autenticazione
-````typescript:src/contexts/AuthContext.tsx
+```typescript:src/contexts/AuthContext.tsx
 export const AuthProvider: React.FC = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -461,10 +461,10 @@ export const AuthProvider: React.FC = ({ children }) => {
 
   // ... resto del codice
 };
-````
+```
 
 ### 2. Gestione Dati
-````typescript:src/lib/api/queries.ts
+```typescript:src/lib/api/queries.ts
 export const queries = {
   fetchDashboardData: async (client: string, dateRange: DateRange | null) => {
     const query = supabase
@@ -487,10 +487,10 @@ export const queries = {
   },
   // ... altre query
 };
-````
+```
 
 ### 3. Hooks Personalizzati
-````typescript:src/hooks/usePostsData.ts
+```typescript:src/hooks/usePostsData.ts
 export function usePostsData(options: UsePostsDataOptions = {}) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -517,7 +517,7 @@ export function usePostsData(options: UsePostsDataOptions = {}) {
 
   return { posts, loading, error };
 }
-````
+```
 
 ## 📊 Visualizzazione Dati
 
@@ -535,7 +535,7 @@ export function usePostsData(options: UsePostsDataOptions = {}) {
 ## 🔒 Sicurezza e Permessi
 
 ### 1. Route Protection
-````typescript:src/components/ProtectedRoute.tsx
+```typescript:src/components/ProtectedRoute.tsx
 export function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -550,7 +550,7 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
   
   return user ? <>{children}</> : null;
 }
-````
+```
 
 ### 2. Gestione API
 - Rate limiting
@@ -570,9 +570,110 @@ Questa struttura modulare permette:
 - Testing efficace
 - Scalabilità del progetto
 
-<<<<<<< HEAD
-=======
+# Flatmates Dashboard - Architettura MCD
 
->>>>>>> b63112cbaaf501a418401fb6f8f78d01c3d1201e
+## Model (Modello)
+
+### Database (Supabase)
+- **Tabelle Principali**:
+  - `combined_data`: Contiene i dati dei post social
+    - Campi: input_id, post_thumbnail, input_title, post_description, post_view_count, post_like_count, post_comment_count, input_client, post_creator_name, platform, post_published_at
+  - `auth`: Gestita da Supabase per l'autenticazione
+    - Campi: email, password (hash), provider (Google)
+
+### Tipi di Dati (TypeScript)
+- `Post`: Interfaccia per i post social
+- `User`: Interfaccia per gli utenti autenticati
+- `InputData`: Interfaccia per i dati di input nel pannello admin
+
+## Controller (Controllo)
+
+### Autenticazione
+- `AuthContext`: Gestisce lo stato di autenticazione
+  - Funzioni: login, loginWithGoogle, logout
+  - Stati: user, isAuthenticated, isLoading
+
+### Gestione Dati
+- `DashboardPage`: Controller principale per la dashboard
+  - Gestione metriche e statistiche
+  - Filtri per client e date
+  - Calcolo engagement rate
+
+- `AdminPanel`: Controller per la gestione amministrativa
+  - CRUD operazioni sui dati
+  - Gestione autorizzazioni utente
+  - Validazione input
+
+- `SocialPostCards`: Controller per la visualizzazione dei post
+  - Filtri e ordinamento
+  - Gestione paginazione
+  - Calcolo metriche di engagement
+
+## Data (Dati)
+
+### API Endpoints (Supabase)
+- `/auth/*`: Endpoints per autenticazione
+- `/combined_data`: Endpoint per i dati dei post
+- `/input_data`: Endpoint per i dati amministrativi
+
+### Servizi Esterni
+- Google OAuth per autenticazione
+- CORS proxy per immagini Instagram
+- Potenziale integrazione con Retool per email
+
+## Componenti UI Principali
+
+### Layout
+- `App`: Componente root con routing e layout principale
+- `Sidebar`: Navigazione principale
+- `ThemeProvider`: Gestione tema chiaro/scuro
+
+### Pagine
+- `DashboardPage`: Dashboard principale con metriche
+- `AdminPanel`: Pannello amministrativo
+- `SocialPostCards`: Griglia di post social
+- `Login`: Pagina di autenticazione
+
+### Componenti Riutilizzabili
+- `Card`: Componente base per le card
+- `DataTable`: Tabella dati con ordinamento
+- `PieChart`: Visualizzazione dati circolare
+- `DatePickerWithRange`: Selezione range date
+
+## Flusso dei Dati
+
+1. **Autenticazione**:
+   - Login con Google OAuth
+   - Gestione sessione con Supabase
+   - Protezione rotte
+
+2. **Dashboard**:
+   - Fetch dati da Supabase
+   - Calcolo metriche in tempo reale
+   - Filtri e ordinamento lato client
+
+3. **Admin Panel**:
+   - Validazione autorizzazioni
+   - CRUD operazioni su dati
+   - Gestione errori e feedback
+
+4. **Social Cards**:
+   - Fetch e caching dati
+   - Filtri multipli
+   - Ordinamento dinamico
+
+## Sicurezza
+
+- Autenticazione OAuth con Google
+- Protezione rotte basata su ruoli
+- Validazione input lato client e server
+- Gestione sicura delle sessioni
+
+## Performance
+
+- Caching dati lato client
+- Lazy loading componenti
+- Ottimizzazione query Supabase
+- Gestione efficiente delle immagini
 
 
